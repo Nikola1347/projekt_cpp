@@ -1,0 +1,12 @@
+#include <SFML/Graphics.hpp>
+
+class Game;
+
+class State {
+public:
+    virtual ~State() = default;
+
+    virtual void handleInput(Game& game) = 0;
+    virtual void update(Game& game) = 0;
+    virtual void render(Game& game, sf::RenderWindow& window) = 0;
+};
