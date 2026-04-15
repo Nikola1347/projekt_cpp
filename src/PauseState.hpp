@@ -3,16 +3,17 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-class MenuState : public State {
-public:
-    MenuState();
+struct PauseState : State {
+    PauseState();
 
     void handleInput(Game& game) override;
     void update(Game& game) override;
     void draw(Game& game) override;
 
-private:
     sf::Font font;
-    std::vector<sf::Text> options;
+    sf::RectangleShape background;
+    sf::Text title;
+    std::vector<sf::Text> texts;
+    std::vector<sf::RectangleShape> boxes;
     int selected = 0;
 };

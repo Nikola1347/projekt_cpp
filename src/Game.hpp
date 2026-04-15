@@ -4,17 +4,16 @@
 #include <vector>
 #include "State.hpp"
 
-class Game {
-public:
+struct Game {
     Game();
+    
     void pushState(std::unique_ptr<State> state);
     void popState();
     State* currentState();
 
     void run();
+    void goToMenu();
 
     sf::RenderWindow window;
-
-private:
     std::vector<std::unique_ptr<State>> states;
 };

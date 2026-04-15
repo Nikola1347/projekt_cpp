@@ -1,9 +1,8 @@
 #pragma once
 
-class Game;
+struct Game;
 
-class State {
-public:
+struct State {
     virtual ~State() = default;
 
     virtual void handleInput(Game& game) = 0;

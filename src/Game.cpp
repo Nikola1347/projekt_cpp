@@ -1,8 +1,9 @@
 #include "Game.hpp"
+#include "MenuState.hpp"
 
-Game::Game()
-: window(sf::VideoMode(800, 600), "gra x")
-{
+Game::Game() {
+    window.create(sf::VideoMode(800, 600), "Symulator farmy");
+    pushState(std::make_unique<MenuState>());
 }
 
 void Game::pushState(std::unique_ptr<State> state) {
@@ -22,16 +23,23 @@ State* Game::currentState() {
 void Game::run() {
     while(window.isOpen()) {
 
-        if(currentState()) {
-            currentState()->handleInput(*this);
-            currentState()->update(*this);
-        }
+        State* state = currentState();
+        if(!state) continue;
 
-        window.clear(sf::Color::Black);
+        state->handleInput(*this);
+        state = currentState();
 
-        if(currentState())
-            currentState()->draw(*this);
+        if(!state) continue;
 
+        state->update(*this);
+
+        window.clear();
+        state->draw(*this);
         window.display();
     }
+}
+
+void Game::goToMenu() {
+    states.clear();
+    pushState(std::make_unique<MenuState>());
 }

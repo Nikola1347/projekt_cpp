@@ -1,26 +1,26 @@
-#include "MenuState.hpp"
+#include "PauseState.hpp"
 #include "Game.hpp"
-#include "PlayState.hpp"
 #include "HelpState.hpp"
-#include <iostream>
+#include "MenuState.hpp"
 
-MenuState::MenuState() {
+PauseState::PauseState() {
     font.loadFromFile("assets/fonts/arial.ttf");
+
     background.setSize({800, 600});
     background.setFillColor(sf::Color(0, 80, 0));
 
     title.setFont(font);
-    title.setString("Symulator Farmy");
+    title.setString("Pauza");
     title.setCharacterSize(48);
     title.setFillColor(sf::Color::Black);
     float titleWidth = title.getLocalBounds().width;
     title.setPosition(400 - titleWidth / 2, 80);
 
     std::vector<std::string> names = {
-        "Nowa gra",
-        "Wczytaj gre",
         "Pomoc",
-        "Wyjscie"
+        "Zapisz gre",
+        "Powrot do menu",
+        "Wroc do gry"
     };
 
     float centerX = 800 / 2;
@@ -55,9 +55,9 @@ MenuState::MenuState() {
     }
 }
 
-void MenuState::handleInput(Game& game) {
+void PauseState::handleInput(Game& game) {
     sf::Event event;
-    while (game.window.pollEvent(event)) {
+    while(game.window.pollEvent(event)) {
 
         if(event.type == sf::Event::Closed)
             game.window.close();
@@ -73,28 +73,37 @@ void MenuState::handleInput(Game& game) {
             if(event.key.code == sf::Keyboard::Enter) {
 
                 if(selected == 0) {
-                    game.pushState(std::make_unique<PlayState>());
-                    return;
-                }
-
-                if(selected == 1) {
-                    texts[1].setString("Brak zapisu");
-                }
-
-                if(selected == 2) {
                     game.pushState(std::make_unique<HelpState>());
                     return;
                 }
 
-                if(selected == 3)
-                    game.window.close();
+                if(selected == 1) {
+                    texts[1].setString("Zapisano");
+                }
+
+                if(selected == 2) {
+                    game.goToMenu();
+                    return;
+                }
+
+                if(selected == 3) {
+                    game.popState();
+                    return;
+                }
+            }
+
+            if(event.key.code == sf::Keyboard::Escape ||
+                event.key.code == sf::Keyboard::M)
+            {
+                game.popState();
+                return;
             }
         }
     }
 }
 
-void MenuState::update(Game& game) {
-    for (int i = 0; i < texts.size(); i++) {
+void PauseState::update(Game& game) {
+    for (int i=0; i<texts.size(); i++) {
         if (i == selected) {
             boxes[i].setFillColor(sf::Color(0, 160, 0));
         } else {
@@ -103,12 +112,12 @@ void MenuState::update(Game& game) {
     }
 }
 
-void MenuState::draw(Game& game) {
+void PauseState::draw(Game& game) {
     game.window.setView(game.window.getDefaultView());
     game.window.draw(background);
     game.window.draw(title);
 
-    for (int i = 0; i < texts.size(); i++) {
+    for (int i=0; i<texts.size(); i++) {
         game.window.draw(boxes[i]);
         game.window.draw(texts[i]);
     }
