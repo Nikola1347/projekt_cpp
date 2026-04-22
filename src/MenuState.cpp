@@ -5,6 +5,7 @@
 #include <iostream>
 
 MenuState::MenuState() {
+    //wizualne
     font.loadFromFile("assets/fonts/arial.ttf");
     background.setSize({800, 600});
     background.setFillColor(sf::Color(0, 80, 0));
@@ -23,26 +24,24 @@ MenuState::MenuState() {
         "Wyjscie"
     };
 
-    float centerX = 800 / 2;
+    float centerX = 800/2;
     float startY = 200;
 
-    for (int i = 0; i < names.size(); i++) {
+    for (int i=0; i<names.size(); i++) {
 
-        // TEKST
         sf::Text text;
         text.setFont(font);
         text.setString(names[i]);
         text.setCharacterSize(32);
         text.setFillColor(sf::Color::Black);
 
-        // PROSTOKĄT
         sf::RectangleShape box;
         box.setSize({400, 50});
         box.setFillColor(sf::Color(0, 120, 0));
         box.setOutlineColor(sf::Color::Black);
         box.setOutlineThickness(3);
 
-        float y = startY + i * 80;
+        float y = startY + i*80;
 
         box.setPosition(centerX - 200, y);
 
@@ -59,34 +58,34 @@ void MenuState::handleInput(Game& game) {
     sf::Event event;
     while (game.window.pollEvent(event)) {
 
-        if(event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed)
             game.window.close();
 
-        if(event.type == sf::Event::KeyPressed) {
+        if (event.type == sf::Event::KeyPressed) {
 
-            if(event.key.code == sf::Keyboard::Down)
+            if (event.key.code == sf::Keyboard::Down)
                 selected = (selected + 1) % texts.size();
 
-            if(event.key.code == sf::Keyboard::Up)
+            if (event.key.code == sf::Keyboard::Up)
                 selected = (selected - 1 + texts.size()) % texts.size();
 
-            if(event.key.code == sf::Keyboard::Enter) {
+            if (event.key.code == sf::Keyboard::Enter) {
 
-                if(selected == 0) {
+                if (selected == 0) {
                     game.pushState(std::make_unique<PlayState>());
                     return;
                 }
 
-                if(selected == 1) {
-                    texts[1].setString("Brak zapisu");
+                if (selected == 1) {
+                    texts[1].setString("Brak zapisu"); //do dodania 
                 }
 
-                if(selected == 2) {
+                if (selected == 2) {
                     game.pushState(std::make_unique<HelpState>());
                     return;
                 }
 
-                if(selected == 3)
+                if (selected == 3)
                     game.window.close();
             }
         }
@@ -97,7 +96,8 @@ void MenuState::update(Game& game) {
     for (int i = 0; i < texts.size(); i++) {
         if (i == selected) {
             boxes[i].setFillColor(sf::Color(0, 160, 0));
-        } else {
+        }
+        else {
             boxes[i].setFillColor(sf::Color(0, 120, 0));
         }
     }

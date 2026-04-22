@@ -10,7 +10,6 @@ struct Game {
     void pushState(std::unique_ptr<State> state);
     void popState();
     State* currentState();
-
     void run();
     void goToMenu();
 

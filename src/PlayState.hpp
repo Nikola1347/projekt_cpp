@@ -1,8 +1,9 @@
 #pragma once
 #include "State.hpp"
 #include "../entities/Player.hpp"
-#include "../systems/timesystem.hpp"
 #include <SFML/Graphics.hpp>
+#include <tmxlite/Map.hpp>
+#include <tmxlite/TileLayer.hpp>
 
 struct PlayState : State {
     PlayState();
@@ -13,10 +14,13 @@ struct PlayState : State {
 
     sf::Font font;
     sf::Text text;
-    sf::Texture mapTexture;
-    sf::Sprite mapSprite;
     Player player;
     sf::View camera;
-    TimeSystem timeSystem;
     sf::Clock dtClock;
+
+    tmx::Map mapa;
+    std::vector<sf::VertexArray> warstwy;
+    sf::Vector2u mapSizePixels;
+    sf::Texture tileset;
+    sf::Texture tilesetFence;
 };
