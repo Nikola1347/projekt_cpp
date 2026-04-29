@@ -7,13 +7,28 @@
 
 PlayState::PlayState()
 {
-    //obsługa błędów
     if (!mapa.load("assets/maps/mapa.tmx"))
-        std::cout << "błąd z mapa.tmx" << std::endl;
-    if (!tileset.loadFromFile("assets/maps/Tileset Spring.png"))
-        std::cout << "błąd z Tileset Spring.png" << std::endl;
-    if (!tilesetFence.loadFromFile("assets/maps/Fence's copiar.png"))
-        std::cout << "błąd z Fence's copiar.png" << std::endl;
+        std::cout << "Błąd: mapa.tmx" << std::endl;
+
+    // test do ścieżek (USUŃ PÓŹNIEJ)
+    const auto& tilesets = mapa.getTilesets();
+    for (const auto& ts : tilesets)
+    {
+        std::cout << "Tileset path: " << ts.getImagePath() << std::endl;
+    }
+
+    // ładowanie tilesetów
+    for (const auto& ts : tilesets)
+    {
+        sf::Texture tex;
+        std::string path = ts.getImagePath();
+
+        if (!tex.loadFromFile(path))
+            std::cout << "Blad ladowania tilesetu: " << path << std::endl;
+
+        tilesetTextures.push_back(std::move(tex));
+        firstGIDs.push_back(ts.getFirstGID());
+    }
 
     // mapa
     auto tile = mapa.getTileSize();
@@ -90,12 +105,9 @@ void PlayState::update(Game& game) {
 
 void PlayState::draw(Game& game)
 {
-    //widok
     sf::RenderWindow& window = game.window;
-    game.window.setView(game.window.getDefaultView());
     window.setView(camera);
 
-    //mapa
     const auto& layers = mapa.getLayers();
 
     for (const auto& layer : layers)
@@ -103,13 +115,12 @@ void PlayState::draw(Game& game)
         if (layer->getType() != tmx::Layer::Type::Tile)
             continue;
 
+        // sprawdzanie w czasie programu czy wskaźnik lub referencja do klasy bazowej faktycznie wskazuje na obiekt klasy pochodnej
         const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
-
         if (!tileLayer)
             continue;
 
         const auto& tiles = tileLayer->getTiles();
-
         auto tileSize = mapa.getTileSize();
         auto mapSize = mapa.getTileCount();
 
@@ -121,41 +132,33 @@ void PlayState::draw(Game& game)
                 const auto& tile = tiles[index];
 
                 int gid = tile.ID;
-                if (gid == 0) 
+                if (gid == 0)
                     continue;
 
-                sf::Texture* tex = nullptr;
-                int localID = 0;
-
-                // Tileset firstgid = 1
-                if (gid >= 1 && gid < 241)
+                // znalezienie tilesetu dla GID
+                int tsIndex = -1;
+                for (int i=0; i<firstGIDs.size(); i++)
                 {
-                    tex = &tileset;
-                    localID = gid - 1;
-                }
-                // Fences firstgid = 241
-                else if (gid >= 241)
-                {
-                    tex = &tilesetFence;
-                    localID = gid - 241;
+                    if (gid >= firstGIDs[i])
+                        tsIndex = i;
+                    else
+                        break;
                 }
 
-                if (!tex) continue;
+                if (tsIndex == -1)
+                    continue;
 
-                int columns = tex->getSize().x / tileSize.x;
+                const sf::Texture& tex = tilesetTextures[tsIndex];
+                int localID = gid - firstGIDs[tsIndex];
+
+                int columns = tex.getSize().x / tileSize.x;
 
                 int tx = localID % columns;
                 int ty = localID / columns;
 
                 sf::Sprite sprite;
-                sprite.setTexture(*tex);
-                sprite.setTextureRect(sf::IntRect(
-                    tx * tileSize.x,
-                    ty * tileSize.y,
-                    tileSize.x,
-                    tileSize.y
-                ));
-
+                sprite.setTexture(tex);
+                sprite.setTextureRect(sf::IntRect(tx * tileSize.x, ty * tileSize.y, tileSize.x, tileSize.y));
                 sprite.setPosition(x * tileSize.x, y * tileSize.y);
                 window.draw(sprite);
             }

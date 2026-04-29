@@ -19,8 +19,8 @@ struct PlayState : State {
     sf::Clock dtClock;
 
     tmx::Map mapa;
-    std::vector<sf::VertexArray> warstwy;
     sf::Vector2u mapSizePixels;
-    sf::Texture tileset;
-    sf::Texture tilesetFence;
+
+    std::vector<sf::Texture> tilesetTextures;
+    std::vector<unsigned> firstGIDs;
 };
