@@ -30,6 +30,9 @@ PlayState::PlayState()
         firstGIDs.push_back(ts.getFirstGID());
     }
 
+    //ładowanie playera
+    player.loadAnimations();
+
     // mapa
     auto tile = mapa.getTileSize();
     auto count = mapa.getTileCount();
@@ -61,18 +64,41 @@ void PlayState::update(Game& game) {
     //poruszanie się
     float dt = dtClock.restart().asSeconds();
     float speed = 150.f; //do zmiany
+    player.walking = false;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    //góra
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
         player.pos.y -= speed * dt;
+        player.currentDir = 1;
+        player.walking = true;
+        player.sprite.setScale(1.f, 1.f);
+    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    //dół
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
         player.pos.y += speed * dt;
+        player.currentDir = 0;
+        player.walking = true;
+        player.sprite.setScale(1.f, 1.f);
+    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    //lewo
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
         player.pos.x -= speed * dt;
+        player.currentDir = 2;
+        player.walking = true;
+        player.sprite.setScale(-1.f, 1.f);
+    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    //prawo
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
         player.pos.x += speed * dt;
+        player.currentDir = 2;
+        player.walking = true;
+        player.sprite.setScale(1.f, 1.f);
+    }
+
+    player.update(dt);
 
     //mapa
     float mapW = mapSizePixels.x;
