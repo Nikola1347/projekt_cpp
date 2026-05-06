@@ -27,6 +27,17 @@ void Player::loadAnimations()
     sprite.setOrigin(16, 16);
 }
 
+//hitboxy gracza
+sf::FloatRect Player::getHitbox() const
+{
+    return sf::FloatRect(
+        pos.x - 6, // przesunięcie hitboxa w prawo
+        pos.y - 6, // przesunięcie hitboxa w dół
+        12, // szerokość hitboxa
+        16 // wysokość hitboxa
+    );
+}
+
 void Player::update(float dt)
 {
     animTimer += dt;

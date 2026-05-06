@@ -23,4 +23,6 @@ struct Player {
 
     void loadAnimations();
     void update(float dt);
+
+    sf::FloatRect getHitbox() const;
 };
