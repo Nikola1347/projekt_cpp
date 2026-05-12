@@ -47,7 +47,7 @@ PlayState::PlayState()
                     float w = obj.getAABB().width;
                     float h = obj.getAABB().height;
 
-                    tileCollision[tile.ID] = sf::FloatRect(ox, oy, w, h);
+                    tileCollision[ts.getFirstGID() + tile.ID] = sf::FloatRect(ox, oy, w, h);
                 }
             }
         }
@@ -105,7 +105,19 @@ void PlayState::update(Game& game) {
 
     for (const auto& layer : layers)
     {
-        if (layer->getType() != tmx::Layer::Type::Tile) // ZMIEŃ NA PO NAZWIE
+        //kolizje
+        bool layerHasCollision = false;
+
+        for (const auto& p : layer->getProperties())
+        {
+            if (p.getName() == "collision" && p.getBoolValue())
+            {
+                layerHasCollision = true;
+                break;
+            }
+        }
+
+        if (!layerHasCollision)
             continue;
 
         const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
@@ -137,12 +149,10 @@ void PlayState::update(Game& game) {
                 if (tsIndex == -1)
                     continue;
 
-                int localID = gid - firstGIDs[tsIndex];
-
                 // sprawdzanie czy ma hitboxa
-                if (tileCollision.find(localID) != tileCollision.end())
+                if (tileCollision.find(gid) != tileCollision.end())
                 {
-                    const auto& col = tileCollision[localID];
+                    const auto& col = tileCollision[gid];
                     sf::FloatRect worldCol(
                         x * tileSize.x + col.left,
                         y * tileSize.y + col.top,
@@ -248,68 +258,86 @@ void PlayState::update(Game& game) {
     game.window.setView(camera);
 }
 
+void PlayState::drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::RenderWindow& window)
+{
+    const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
+    if (!tileLayer) return;
+
+    const auto& tiles = tileLayer->getTiles();
+    auto tileSize = mapa.getTileSize();
+    auto mapSize = mapa.getTileCount();
+
+    for (unsigned y=0; y<mapSize.y; y++)
+    {
+        for (unsigned x=0; x<mapSize.x; x++)
+        {
+            std::size_t index = x + y * mapSize.x;
+            const auto& tile = tiles[index];
+
+            int gid = tile.ID;
+            if (gid == 0)
+                continue;
+
+            int tsIndex = -1;
+            for (int i = 0; i < firstGIDs.size(); i++)
+            {
+                if (gid >= firstGIDs[i])
+                    tsIndex = i;
+                else
+                    break;
+            }
+
+            if (tsIndex == -1)
+                continue;
+
+            const sf::Texture& tex = tilesetTextures[tsIndex];
+            int localID = gid - firstGIDs[tsIndex];
+
+            int columns = tex.getSize().x / tileSize.x;
+
+            int tx = localID % columns;
+            int ty = localID / columns;
+
+            // rysowanie kafelka
+            sf::Sprite sprite;
+            sprite.setTexture(tex);
+            sprite.setTextureRect(sf::IntRect(tx * tileSize.x, ty * tileSize.y, tileSize.x, tileSize.y));
+            sprite.setPosition(x * tileSize.x, y * tileSize.y);
+            window.draw(sprite);
+        }
+    }
+}
+
 void PlayState::draw(Game& game)
 {
     sf::RenderWindow& window = game.window;
     window.setView(camera);
 
     const auto& layers = mapa.getLayers();
-    auto tileSize = mapa.getTileSize();
-    auto mapSize = mapa.getTileCount();
 
+    // warstwy pod
     for (const auto& layer : layers)
     {
-        if (layer->getType() != tmx::Layer::Type::Tile)
-            continue;
-
-        const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
-        if (!tileLayer)
-            continue;
-
-        const auto& tiles = tileLayer->getTiles();
-
-        for (unsigned y = 0; y < mapSize.y; y++)
+        std::string name = layer->getName();
+        if (name == "ścieżka" || name == "podłoga")
         {
-            for (unsigned x = 0; x < mapSize.x; x++)
-            {
-                std::size_t index = x + y * mapSize.x;
-                const auto& tile = tiles[index];
-
-                int gid = tile.ID;
-                if (gid == 0)
-                    continue;
-
-                // znajdź tileset
-                int tsIndex = -1;
-                for (int i = 0; i < firstGIDs.size(); i++)
-                {
-                    if (gid >= firstGIDs[i])
-                        tsIndex = i;
-                    else
-                        break;
-                }
-
-                if (tsIndex == -1)
-                    continue;
-
-                const sf::Texture& tex = tilesetTextures[tsIndex];
-                int localID = gid - firstGIDs[tsIndex];
-
-                int columns = tex.getSize().x / tileSize.x;
-
-                int tx = localID % columns;
-                int ty = localID / columns;
-
-                // rysowanie kafelka
-                sf::Sprite sprite;
-                sprite.setTexture(tex);
-                sprite.setTextureRect(sf::IntRect(tx * tileSize.x, ty * tileSize.y, tileSize.x, tileSize.y));
-                sprite.setPosition(x * tileSize.x, y * tileSize.y);
-                window.draw(sprite);
-            }
+            drawTileLayer(layer, window);
         }
     }
+
+    // gracz
     window.draw(player.sprite);
+
+    //warstwy nad
+    for (const auto& layer : layers)
+    {
+        std::string name = layer->getName();
+
+        if (name == "drzewa" || name == "skrzynka" || name == "tabliczki" || name == "sklep1" || name == "domki_atrapy" || name == "płoty" || name == "płoty_blokada")
+        {
+            drawTileLayer(layer, window);
+        }
+    }
 
     // DEBUGI
     sf::FloatRect hb = player.getHitbox();

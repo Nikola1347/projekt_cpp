@@ -26,4 +26,6 @@ struct PlayState : State {
     std::vector<sf::FloatRect> collisionRects;
     bool checkCollision(const sf::FloatRect& nextPos);
     std::unordered_map<int, sf::FloatRect> tileCollision;
+
+    void drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::RenderWindow& window);
 };
