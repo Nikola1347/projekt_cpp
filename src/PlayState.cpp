@@ -1,6 +1,7 @@
 #include "PlayState.hpp"
 #include "Game.hpp"
 #include "PauseState.hpp"
+#include "MiniMenuState.hpp"
 #include <iostream>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/TileLayer.hpp>
@@ -98,6 +99,7 @@ bool PlayState::checkCollision(const sf::FloatRect& nextPos)
 void PlayState::update(Game& game) {
 
     collisionRects.clear();
+    interactRects.clear();
 
     const auto& layers = mapa.getLayers();
     auto tileSize = mapa.getTileSize();
@@ -105,20 +107,21 @@ void PlayState::update(Game& game) {
 
     for (const auto& layer : layers)
     {
-        //kolizje
+        //kolizje i interakcje
         bool layerHasCollision = false;
+        bool layerHasInteract = false;
 
         for (const auto& p : layer->getProperties())
         {
             if (p.getName() == "collision" && p.getBoolValue())
-            {
                 layerHasCollision = true;
-                break;
-            }
+
+            if (p.getName() == "interact" && p.getBoolValue())
+                layerHasInteract = true;
         }
 
-        if (!layerHasCollision)
-            continue;
+        //if (!layerHasCollision)
+        //  continue;
 
         const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
         if (!tileLayer)
@@ -149,10 +152,11 @@ void PlayState::update(Game& game) {
                 if (tsIndex == -1)
                     continue;
 
-                // sprawdzanie czy ma hitboxa
+                // sprawdzanie czy ma kolizje/interakcje
                 if (tileCollision.find(gid) != tileCollision.end())
                 {
                     const auto& col = tileCollision[gid];
+
                     sf::FloatRect worldCol(
                         x * tileSize.x + col.left,
                         y * tileSize.y + col.top,
@@ -160,7 +164,20 @@ void PlayState::update(Game& game) {
                         col.height
                     );
 
-                    collisionRects.push_back(worldCol);
+                    if (layerHasCollision)
+                        collisionRects.push_back(worldCol);
+
+                    if (layerHasInteract)
+                    {
+                        sf::FloatRect interactCol = worldCol;
+
+                        interactCol.left   -= interactCol.width / 2;
+                        interactCol.top    -= interactCol.height / 2;
+                        interactCol.width  *= 2;
+                        interactCol.height *= 2;
+
+                        interactRects.push_back(interactCol);
+                    }
                 }
             }
         }
@@ -229,6 +246,19 @@ void PlayState::update(Game& game) {
 
     player.update(dt);
 
+    // wywołanie mini menu
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    {
+        for (const auto& rect : interactRects)
+        {
+            if (rect.intersects(player.getHitbox()))
+            {
+                game.pushState(std::make_unique<MiniMenuState>());
+                break;
+            }
+        }
+    }
+
     //mapa
     float mapW = mapSizePixels.x;
     float mapH = mapSizePixels.y;
@@ -258,8 +288,7 @@ void PlayState::update(Game& game) {
     game.window.setView(camera);
 }
 
-void PlayState::drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::RenderWindow& window)
-{
+void PlayState::drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::RenderWindow& window) {
     const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
     if (!tileLayer) return;
 
@@ -308,8 +337,7 @@ void PlayState::drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::Rend
     }
 }
 
-void PlayState::draw(Game& game)
-{
+void PlayState::draw(Game& game) {
     sf::RenderWindow& window = game.window;
     window.setView(camera);
 
@@ -355,4 +383,14 @@ void PlayState::draw(Game& game)
         r.setFillColor(sf::Color(255, 0, 0, 100));
         window.draw(r);
     }
+
+    for (auto& r : interactRects)
+    {
+        sf::RectangleShape s;
+        s.setPosition(r.left, r.top);
+        s.setSize({r.width, r.height});
+        s.setFillColor(sf::Color(0, 0, 255, 120));
+        window.draw(s);
+    }
+
 }

@@ -34,7 +34,10 @@ void Game::run() {
         state->update(*this);
 
         window.clear();
-        state->draw(*this);
+
+        for (auto& s : states)
+            s->draw(*this);
+
         window.display();
     }
 }
