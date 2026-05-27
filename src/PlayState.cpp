@@ -2,7 +2,9 @@
 #include "Game.hpp"
 #include "PauseState.hpp"
 #include "MiniMenuState.hpp"
+#include "../systems/PlantSystem.hpp"
 #include <iostream>
+#include <cmath>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/TileLayer.hpp>
 
@@ -17,6 +19,11 @@ PlayState::PlayState()
     for (const auto& ts : tilesets)
     {
         std::cout << "Tileset path: " << ts.getImagePath() << std::endl;
+    }
+
+    if (!font.loadFromFile("assets/fonts/arial.ttf"))
+    {
+        std::cout << "błąd fontu w PlayState\n";
     }
 
     // ładowanie tilesetów
@@ -68,6 +75,38 @@ PlayState::PlayState()
     // kamera
     camera.setSize(400, 300);
     camera.setCenter(400, 300);
+
+    // PlantSystem
+    plantSystem = PlantSystem();
+    plantSystem.load(mapa);
+
+    // wczytywanie tabliczek z warstwy tab_obj
+    for (const auto& layer : mapa.getLayers())
+    {
+        if (layer->getName() == "tab_obj" && layer->getType() == tmx::Layer::Type::Object)
+        {
+            const auto& objLayer = layer->getLayerAs<tmx::ObjectGroup>();
+
+            for (const auto& obj : objLayer.getObjects())
+            {
+                Sign s;
+
+                // fieldID
+                for (const auto& p : obj.getProperties())
+                {
+                    if (p.getName() == "fieldID")
+                    {
+                        s.fieldID = p.getIntValue();
+                    }
+                }
+
+                // obszar interakcji
+                auto aabb = obj.getAABB();
+                s.area = sf::FloatRect(aabb.left, aabb.top, aabb.width, aabb.height);
+                signs.push_back(s);
+            }
+        }
+    }
 }
 
 void PlayState::handleInput(Game& game) {
@@ -99,7 +138,6 @@ bool PlayState::checkCollision(const sf::FloatRect& nextPos)
 void PlayState::update(Game& game) {
 
     collisionRects.clear();
-    interactRects.clear();
 
     const auto& layers = mapa.getLayers();
     auto tileSize = mapa.getTileSize();
@@ -107,21 +145,14 @@ void PlayState::update(Game& game) {
 
     for (const auto& layer : layers)
     {
-        //kolizje i interakcje
+        //kolizje
         bool layerHasCollision = false;
-        bool layerHasInteract = false;
 
         for (const auto& p : layer->getProperties())
         {
             if (p.getName() == "collision" && p.getBoolValue())
                 layerHasCollision = true;
-
-            if (p.getName() == "interact" && p.getBoolValue())
-                layerHasInteract = true;
         }
-
-        //if (!layerHasCollision)
-        //  continue;
 
         const tmx::TileLayer* tileLayer = dynamic_cast<const tmx::TileLayer*>(layer.get());
         if (!tileLayer)
@@ -152,7 +183,7 @@ void PlayState::update(Game& game) {
                 if (tsIndex == -1)
                     continue;
 
-                // sprawdzanie czy ma kolizje/interakcje
+                // sprawdzanie czy ma kolizje
                 if (tileCollision.find(gid) != tileCollision.end())
                 {
                     const auto& col = tileCollision[gid];
@@ -166,18 +197,6 @@ void PlayState::update(Game& game) {
 
                     if (layerHasCollision)
                         collisionRects.push_back(worldCol);
-
-                    if (layerHasInteract)
-                    {
-                        sf::FloatRect interactCol = worldCol;
-
-                        interactCol.left   -= interactCol.width / 2;
-                        interactCol.top    -= interactCol.height / 2;
-                        interactCol.width  *= 2;
-                        interactCol.height *= 2;
-
-                        interactRects.push_back(interactCol);
-                    }
                 }
             }
         }
@@ -245,15 +264,23 @@ void PlayState::update(Game& game) {
     }
 
     player.update(dt);
+    plantSystem.update(dt);
 
     // wywołanie mini menu
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
     {
-        for (const auto& rect : interactRects)
+        for (const auto& s : signs)
         {
-            if (rect.intersects(player.getHitbox()))
+            if (s.area.intersects(player.getHitbox()))
             {
-                game.pushState(std::make_unique<MiniMenuState>());
+                FieldState state = plantSystem.getFieldState(s.fieldID);
+                std::string plantName = plantSystem.getPlantName(s.fieldID);
+                game.pushState(std::make_unique<MiniMenuState>(
+                    s.fieldID, state, plantName,
+                    [this](int id) { plantSystem.plant(id); },
+                    [this](int id) { plantSystem.water(id); },
+                    [this](int id) { plantSystem.harvest(id); }
+                ));
                 break;
             }
         }
@@ -262,12 +289,6 @@ void PlayState::update(Game& game) {
     //mapa
     float mapW = mapSizePixels.x;
     float mapH = mapSizePixels.y;
-
-    //bariera nie wychodzenia za mape (do zmiany/usunięcia)
-    if (player.pos.x < 0) player.pos.x = 0;
-    if (player.pos.y < 0) player.pos.y = 0;
-    if (player.pos.x > mapW) player.pos.x = mapW;
-    if (player.pos.y > mapH) player.pos.y = mapH;
 
     //ustawienie kamery
     player.sprite.setPosition(player.pos);
@@ -301,6 +322,9 @@ void PlayState::drawTileLayer(const std::unique_ptr<tmx::Layer>& layer, sf::Rend
         for (unsigned x=0; x<mapSize.x; x++)
         {
             std::size_t index = x + y * mapSize.x;
+            if (index >= tiles.size())
+                continue;
+
             const auto& tile = tiles[index];
 
             int gid = tile.ID;
@@ -356,7 +380,7 @@ void PlayState::draw(Game& game) {
     // gracz
     window.draw(player.sprite);
 
-    //warstwy nad
+    // warstwy nad
     for (const auto& layer : layers)
     {
         std::string name = layer->getName();
@@ -365,6 +389,42 @@ void PlayState::draw(Game& game) {
         {
             drawTileLayer(layer, window);
         }
+    }
+
+    plantSystem.draw(game.window);
+
+    // timer nad roślinami
+    for (const auto& s : signs)
+    {
+        float timeLeft = plantSystem.getTimeToNextStage(s.fieldID);
+        if (timeLeft <= 0.f)
+            continue;
+
+        int seconds = (int)std::ceil(timeLeft);
+
+        // pozycja w świecie
+        sf::Vector2f pos(s.area.left, s.area.top - 22.f);
+
+        // ramka
+        sf::RectangleShape frame;
+        frame.setSize({34.f, 20.f});
+        frame.setPosition(pos.x - 4.f, pos.y - 2.f);
+        frame.setFillColor(sf::Color(0, 80, 0, 200));
+        frame.setOutlineThickness(2);
+        frame.setOutlineColor(sf::Color(0, 0, 0));
+
+        // tekst
+        sf::Text txt;
+        txt.setFont(font);
+        txt.setCharacterSize(14);
+        txt.setFillColor(sf::Color::White);
+        txt.setString(std::to_string(seconds) + "s");
+
+        // lekko wyśrodkowany tekst
+        txt.setPosition(pos.x + 4.f, pos.y + 1.f);
+
+        window.draw(frame);
+        window.draw(txt);
     }
 
     // DEBUGI
@@ -383,14 +443,4 @@ void PlayState::draw(Game& game) {
         r.setFillColor(sf::Color(255, 0, 0, 100));
         window.draw(r);
     }
-
-    for (auto& r : interactRects)
-    {
-        sf::RectangleShape s;
-        s.setPosition(r.left, r.top);
-        s.setSize({r.width, r.height});
-        s.setFillColor(sf::Color(0, 0, 255, 120));
-        window.draw(s);
-    }
-
 }

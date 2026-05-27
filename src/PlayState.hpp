@@ -1,6 +1,7 @@
 #pragma once
 #include "State.hpp"
 #include "../entities/Player.hpp"
+#include "../systems/PlantSystem.hpp"
 #include <SFML/Graphics.hpp>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/TileLayer.hpp>
@@ -32,4 +33,16 @@ struct PlayState : State {
 
     //interakcje
     std::vector<sf::FloatRect> interactRects;
+
+    //tabliczki
+    struct Sign {
+        int fieldID;
+        sf::FloatRect area;
+    };
+
+    std::vector<Sign> signs;
+    std::string getPlantName(int fieldID);
+
+    //system roślinek
+    PlantSystem plantSystem;
 };
