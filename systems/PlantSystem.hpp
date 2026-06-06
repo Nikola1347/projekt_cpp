@@ -53,4 +53,7 @@ struct PlantSystem
     std::vector<Field> fields;
     std::string getPlantName(int fieldID);
     float getTimeToNextStage(int fieldID);
+
+    std::map<std::string, int> storage;
+    const std::map<std::string, int>& getStorage() const { return storage; }
 };

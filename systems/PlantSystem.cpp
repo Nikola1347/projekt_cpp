@@ -191,6 +191,10 @@ void PlantSystem::harvest(int id)
     {
         if (f.id == id && f.state == FieldState::ReadyToHarvest)
         {
+            // dodawanie do magazynu
+            storage[f.plantType] += 10;
+            std::cout << "Dodano 10x " << f.plantType << " do magazynu\n";
+            
             f.growthStage = 0;
             f.timer = 0.f;
             f.state = FieldState::Empty;
@@ -219,6 +223,7 @@ std::string PlantSystem::getPlantName(int fieldID)
     return "";
 }
 
+// RYSOWANIE
 void PlantSystem::draw(sf::RenderWindow& window)
 {
     for (auto& f : fields)
