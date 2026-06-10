@@ -4,7 +4,7 @@
 void Player::loadAnimations()
 {
     // animacja chodzenia
-    walkAnim[0].texture.loadFromFile("assets/textures/Walk.png");
+    walkAnim[0].texture.loadFromFile("../assets/textures/Walk.png");
     walkAnim[0].frameCount = 6;
     walkAnim[0].frameWidth = 32;
     walkAnim[0].frameHeight = 32;
@@ -14,7 +14,7 @@ void Player::loadAnimations()
     walkAnim[2] = walkAnim[0]; // dół
 
     // animacja stania
-    idleAnim[0].texture.loadFromFile("assets/textures/Idle.png");
+    idleAnim[0].texture.loadFromFile("../assets/textures/Idle.png");
     idleAnim[0].frameCount = 4;
     idleAnim[0].frameWidth = 32;
     idleAnim[0].frameHeight = 32;

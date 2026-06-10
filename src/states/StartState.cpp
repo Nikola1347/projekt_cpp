@@ -4,7 +4,7 @@
 
 // KONSTRUKTOR – TWORZY EKRAN POWITALNY Z INSTRUKCJĄ
 StartState::StartState() {
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
 
     // tło
     background.setSize({800, 600});

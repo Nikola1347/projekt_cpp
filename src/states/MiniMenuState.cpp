@@ -35,7 +35,7 @@ MiniMenuState::MiniMenuState(
     }
 
     //wizualne
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
     float titleHeight = 60.f;
     float optionHeight = 60.f;
     box.setSize({ 260.f, titleHeight + optionHeight * options.size()});

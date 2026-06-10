@@ -14,7 +14,7 @@
 PlayState::PlayState()
 {
     // wczytywanie mapy
-    if (!mapa.load("assets/maps/mapa.tmx"))
+    if (!mapa.load("../assets/maps/mapa.tmx"))
         std::cout << "Błąd: mapa.tmx" << std::endl;
 
     // ładowanie tilesetów
@@ -24,7 +24,7 @@ PlayState::PlayState()
         std::cout << "Tileset path: " << ts.getImagePath() << std::endl;
     }
 
-    if (!font.loadFromFile("assets/fonts/arial.ttf"))
+    if (!font.loadFromFile("../assets/fonts/arial.ttf"))
     {
         std::cout << "błąd fontu w PlayState\n";
     }

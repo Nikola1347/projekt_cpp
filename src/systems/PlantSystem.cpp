@@ -58,7 +58,7 @@ PlantSystem::PlantSystem()
 // WCZYTUJE POLA UPRAWNE Z MAPY TILED
 void PlantSystem::load(const tmx::Map& map)
 {
-    if (!texture.loadFromFile("assets/maps/Spring Crops.png"))
+    if (!texture.loadFromFile("../assets/maps/Spring Crops.png"))
         std::cout << "Blad ladowania Spring Crops.png" << std::endl;
 
     fields.clear();

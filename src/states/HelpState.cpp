@@ -3,7 +3,7 @@
 
 // KONSTRUKTOR - TWORZY WYGLĄD EKRANU POMOCY
 HelpState::HelpState() {
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
 
     // tło
     background.setSize({800, 600});

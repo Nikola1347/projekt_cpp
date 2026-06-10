@@ -5,7 +5,7 @@
 
 // KONSTRUKTOR - TWORZY WYGLĄD MENU PAUZY
 PauseState::PauseState() {
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
 
     // tło
     background.setSize({800, 600});

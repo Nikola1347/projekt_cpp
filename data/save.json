@@ -1,17 +1,17 @@
 {
     "fields": [
         {
-            "growthStage": 0,
+            "growthStage": 3,
             "id": 1,
             "plantType": "truskawka",
-            "state": 0,
+            "state": 3,
             "timer": 0.0
         },
         {
-            "growthStage": 3,
+            "growthStage": 1,
             "id": 2,
             "plantType": "truskawka",
-            "state": 3,
+            "state": 1,
             "timer": 0.0
         },
         {
@@ -43,10 +43,10 @@
             "timer": 0.0
         },
         {
-            "growthStage": 0,
+            "growthStage": 3,
             "id": 7,
             "plantType": "ziemniak",
-            "state": 0,
+            "state": 3,
             "timer": 0.0
         },
         {
@@ -64,7 +64,7 @@
             "timer": 0.0
         },
         {
-            "growthStage": 2,
+            "growthStage": 1,
             "id": 10,
             "plantType": "cebula",
             "state": 1,
@@ -85,14 +85,16 @@
             "timer": 0.0
         }
     ],
-    "gold": 1,
+    "gold": 2,
     "player": {
-        "x": 537.6030883789063,
-        "y": 173.0547332763672
+        "x": 232.94822692871094,
+        "y": 206.9127197265625
     },
     "storage": {
-        "cebula": 1,
+        "cebula": 0,
         "cebula_seed": 0,
+        "por": 0,
+        "por_seed": 0,
         "truskawka": 0,
         "truskawka_seed": 0,
         "ziemniak": 0,

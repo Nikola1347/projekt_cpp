@@ -7,7 +7,7 @@
 
 // KONSTRUKTOR - TWORZY WYGLĄD MENU GŁÓWNEGO
 MenuState::MenuState() {
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
 
     // tło
     background.setSize({800, 600});

@@ -10,7 +10,7 @@ ShopState::ShopState(
       plantSystem(plantSystemRef)
 {
     // tytuł
-    font.loadFromFile("assets/fonts/arial.ttf");
+    font.loadFromFile("../assets/fonts/arial.ttf");
     title.setFont(font);
     title.setCharacterSize(26);
     title.setFillColor(sf::Color::Black);
