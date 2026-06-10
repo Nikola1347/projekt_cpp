@@ -1,0 +1,101 @@
+{
+    "fields": [
+        {
+            "growthStage": 0,
+            "id": 1,
+            "plantType": "truskawka",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 3,
+            "id": 2,
+            "plantType": "truskawka",
+            "state": 3,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 3,
+            "plantType": "truskawka",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 4,
+            "plantType": "por",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 5,
+            "plantType": "por",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 6,
+            "plantType": "por",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 7,
+            "plantType": "ziemniak",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 8,
+            "plantType": "ziemniak",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 9,
+            "plantType": "ziemniak",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 2,
+            "id": 10,
+            "plantType": "cebula",
+            "state": 1,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 11,
+            "plantType": "cebula",
+            "state": 0,
+            "timer": 0.0
+        },
+        {
+            "growthStage": 0,
+            "id": 12,
+            "plantType": "cebula",
+            "state": 0,
+            "timer": 0.0
+        }
+    ],
+    "gold": 1,
+    "player": {
+        "x": 537.6030883789063,
+        "y": 173.0547332763672
+    },
+    "storage": {
+        "cebula": 1,
+        "cebula_seed": 0,
+        "truskawka": 0,
+        "truskawka_seed": 0,
+        "ziemniak": 0,
+        "ziemniak_seed": 0
+    }
+}
