@@ -31,14 +31,14 @@ void SaveSystem::save(PlayState& state)
     }
 
     // zapis do pliku
-    std::ofstream file("data/save.json");
+    std::ofstream file("../data/save.json");
     file << j.dump(4);
 }
 
 // WCZYTUJE STAN GRY Z PLIKU save.json
 bool SaveSystem::load(PlayState& state)
 {
-    std::ifstream file("data/save.json");
+    std::ifstream file("../data/save.json");
     if (!file.is_open())
         return false;
 
